@@ -69,13 +69,14 @@ delta_k = norm_delta_k * np.exp(tetha_k*1j)
 
 const1_L32 = 1/(boxsize**1.5)
 kmin = (2*np.pi)/boxsize
+kmin2 = kmin**2
 
 #setup particles on a uniform grid
 N = 32
 N3 = N**3
-x1 = a0
-x2 = b0
-x3 = c0
+x1 = np.copy(a0)
+x2 = np.copy(b0)
+x3 = np.copy(c0)
 
 mp.scatter(x1, x2, s=0.1, marker = ".")
 mp.show()
@@ -84,14 +85,15 @@ dx = np.zeros(shape=(N3, 3), dtype = np.complex)
 
 for i in range(0, N3):
     for j in range(0, len(lmn_grid)):
-        psum = 0
-        if ((lmn_grid[j][0] != 0) & (lmn_grid[j][1] != 0) & (lmn_grid[j][2] != 0)):
-            k2 = (lmn_grid[j][0]**2 + lmn_grid[j][1]**2 + lmn_grid[j][2]**2)*(kmin**2)
+        if ((lmn_grid[j][0] == 0) & (lmn_grid[j][1] == 0) & (lmn_grid[j][2] == 0)):
+            dx[i] += 0
+        else:
+            k2 = kmin2*(lmn_grid[j][0]**2 + lmn_grid[j][1]**2 + lmn_grid[j][2]**2)
             norm_delta_klmn = np.sqrt(-np.interp(np.sqrt(k2), pkinit[:,0], pkinit[:,1])*np.log(np.random.uniform(0, 1)))
             tetha_klmn = 2*np.pi*np.random.uniform(0, 1)
             delta_klmn = norm_delta_klmn * np.exp(tetha_klmn*1j)
-            dsum = kmin * const1_L32 * 1j * (delta_klmn / k2) * np.exp(1j * kmin * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
-        dx[i] += dsum
+            dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * kmin * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
+            dx[i] += const1_L32 * dsum
 
 fx = dx[:,0]
 fy = dx[:,1]
@@ -103,7 +105,7 @@ xdisp=fx.real*d1
 ydisp=fy.real*d1
 zdisp=fz.real*d1
     
-#assuming ngrid=nparticles, displace particles from the grid
+#displace particles from the grid
 x1+=xdisp
 x2+=ydisp
 x3+=zdisp
