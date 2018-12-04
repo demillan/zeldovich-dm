@@ -16,7 +16,7 @@ def growthfunc(a, omega_m=0.307115, omega_l=0.692885):
 # Parámetros iniciales
 
 redshift = 0
-boxsize = 128
+boxsize = 32
 ngrid = 32
 f=0.0
 
@@ -31,7 +31,7 @@ pkinit = np.loadtxt('PkTable.dat', skiprows = 5)
 # Previous ZA implementation
 
 # initial position
-cell_len=np.float(boxsize)/np.float(128)
+cell_len=np.float(boxsize)/np.float(ngrid)
     
 #setup particles on a uniform grid
 sk = (ngrid,ngrid,ngrid)
@@ -49,21 +49,19 @@ dens0 = Z.make_gauss_init(pkinit, boxsize=boxsize, ngrid=ngrid, seed=20181203, e
 fx0, fy0, fz0 = Z.get_disp(dens0, boxsize=boxsize, ngrid=ngrid)
 x0, y0, z0 = Z.get_pos(fx0, fy0, fz0*(1+f), redshift, boxsize=boxsize, ngrid=ngrid) 
 
+mp.hist(fx0.flatten(), bins = 100)
+mp.show()
+mp.hist(fy0.flatten(), bins = 100)
+mp.show()
+mp.hist(fz0.flatten(), bins = 100)
+mp.show()
+
 mp.scatter(x0, y0, s=0.1, marker = ".")
 mp.show()
 
 # Generamos la delta_k de cada uno de los M^3 modos
 # Primero generamos las (2*M + 1)^3 posibles combinaciones de l, m, n
 lmn_grid = np.array(np.meshgrid(l, m, n)).reshape(3, (2*M + 1)**3).T
-# lmn_grid = np.delete(lmn_grid, int((2*M + 1)**3 / 2), axis = 0)
-
-# Ahora calculamos theta_k y |delta_k|
-
-tetha_k = 2*np.pi*np.random.uniform(0, 1, lmn_grid.shape[0])
-norm_k = (2*np.pi)*(np.sum(lmn_grid**2, 1))/boxsize
-norm_delta_k = np.sqrt(-np.interp(norm_k, pkinit[:,0], pkinit[:,1])*np.log(np.random.uniform(0, 1, lmn_grid.shape[0])))
-
-delta_k = norm_delta_k * np.exp(tetha_k*1j)
 
 # Calculamos desplazamiento
 
@@ -72,7 +70,7 @@ kmin = (2*np.pi)/boxsize
 kmin2 = kmin**2
 
 #setup particles on a uniform grid
-N = 32
+N = ngrid
 N3 = N**3
 x1 = np.copy(a0)
 x2 = np.copy(b0)
@@ -88,11 +86,13 @@ for i in range(0, N3):
         if ((lmn_grid[j][0] == 0) & (lmn_grid[j][1] == 0) & (lmn_grid[j][2] == 0)):
             dx[i] += 0
         else:
-            k2 = kmin2*(lmn_grid[j][0]**2 + lmn_grid[j][1]**2 + lmn_grid[j][2]**2)
-            norm_delta_klmn = np.sqrt(-np.interp(np.sqrt(k2), pkinit[:,0], pkinit[:,1])*np.log(np.random.uniform(0, 1)))
+            k = kmin*np.sqrt(lmn_grid[j][0]**2 + lmn_grid[j][1]**2 + lmn_grid[j][2]**2)
+            k2 = k*k
+            norm_delta_klmn = np.sqrt(-np.interp(k, pkinit[:,0], pkinit[:,1])*np.log(np.random.uniform(0, 1)))
             tetha_klmn = 2*np.pi*np.random.uniform(0, 1)
             delta_klmn = norm_delta_klmn * np.exp(tetha_klmn*1j)
-            dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * kmin * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
+            # dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
+            dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
             dx[i] += const1_L32 * dsum
 
 fx = dx[:,0]
@@ -104,6 +104,13 @@ d1=growthfunc(1./(1+redshift))/growthfunc(1.)
 xdisp=fx.real*d1
 ydisp=fy.real*d1
 zdisp=fz.real*d1
+
+mp.hist(fx.real*d1, bins = 100)
+mp.show()
+mp.hist(fy.real*d1, bins = 100)
+mp.show()
+mp.hist(fz.real*d1, bins = 100)
+mp.show()
     
 #displace particles from the grid
 x1+=xdisp
