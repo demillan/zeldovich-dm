@@ -19,7 +19,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="zeld-dm_v2.py" />
+    <Compile Include="zeld-dm_v3.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".spyproject\codestyle.ini" />
