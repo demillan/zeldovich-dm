@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import linalg as LA
 import pylab as mp
 import zeldovich as Z
 
@@ -80,6 +81,7 @@ mp.scatter(x1, x2, s=0.1, marker = ".")
 mp.show()
 
 dx = np.zeros(shape=(N3, 3), dtype = np.complex)
+lambdas = np.zeros(shape=(N3, 3), dtype = np.float)
 
 for i in range(0, N3):
     for j in range(0, len(lmn_grid)):
@@ -94,6 +96,22 @@ for i in range(0, N3):
             # dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
             dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
             dx[i] += const1_L32 * dsum
+            # tensor
+            # T[0,0] = kmin**2*dsum*lmn_grid[j][0]**2
+            # T[0,1] = kmin**2*dsum*lmn_grid[j][0]*lmn_grid[j][1]
+            # T[0,2] = kmin**2*dsum*lmn_grid[j][0]*lmn_grid[j][2]
+            # T[1,0] = T[0,1]
+            # T[1,1] = kmin**2*dsum*lmn_grid[j][1]**2
+            # T[1,2] = kmin**2*dsum*lmn_grid[j][1]*lmn_grid[j][2]
+            # T[2,0] = T[0,2]
+            # T[2,1] = T[1,2]
+            # T[2,2] = kmin**2*dsum*lmn_grid[j][2]**2
+            T = np.zeros((3,3))
+            for ii in range(0,3):
+                for jj in range(0,3):
+                    T[ii,jj] = (kmin**2)*dsum*lmn_grid[j][ii]*lmn_grid[j][jj]
+            lambdas[i] = LA.eigvalsh(T)        
+            
 
 fx = dx[:,0]
 fy = dx[:,1]
