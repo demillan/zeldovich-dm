@@ -81,7 +81,7 @@ mp.scatter(x1, x2, s=0.1, marker = ".")
 mp.show()
 
 dx = np.zeros(shape=(N3, 3), dtype = np.complex)
-lambdas = np.zeros(shape=(N3, 3), dtype = np.float)
+lambdas = np.zeros(shape=(N3, 3), dtype = np.float64)
 
 for i in range(0, N3):
     for j in range(0, len(lmn_grid)):
