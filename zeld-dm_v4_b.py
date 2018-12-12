@@ -17,8 +17,8 @@ def growthfunc(a, omega_m=0.307115, omega_l=0.692885):
 # Parámetros iniciales
 
 redshift = 0
-boxsize = 32
-ngrid = 32
+boxsize = 128
+ngrid = 128
 f=0.0
 
 M = int(boxsize / ngrid)
@@ -80,9 +80,28 @@ x3 = np.copy(c0)
 mp.scatter(x1, x2, s=0.1, marker = ".")
 mp.show()
 
+# delta field generation
+reps = 100
+delta_field_klmn = np.zeros(shape=(len(lmn_grid)), dtype = np.complex)
+norm_delta_klmn = np.zeros(shape=(len(lmn_grid)), dtype = np.complex)
+for i in range(0, reps):
+    for j in range(0, len(lmn_grid)):
+            if ((lmn_grid[j][0] == 0) & (lmn_grid[j][1] == 0) & (lmn_grid[j][2] == 0)):
+                dx[i] += 0
+            else:
+                k = kmin*np.sqrt(lmn_grid[j][0]**2 + lmn_grid[j][1]**2 + lmn_grid[j][2]**2)
+                k2 = k*k
+                norm_delta = np.sqrt(-np.interp(k, pkinit[:,0], pkinit[:,1])*np.log(np.random.uniform(0, 1)))
+                tetha_klmn = 2*np.pi*np.random.uniform(0, 1)
+                delta = norm_delta * np.exp(tetha_klmn*1j)
+            norm_delta_klmn[j] += norm_delta
+            delta_field_klmn[j] += delta
+
+norm_delta_klmn = norm_delta_klmn/reps
+delta_field_klmn = delta_field_klmn/reps
+
 dx = np.zeros(shape=(N3, 3), dtype = np.complex)
 lambdas = np.zeros(shape=(N3, 3), dtype = np.complex)
-
 for i in range(0, N3):
     for j in range(0, len(lmn_grid)):
         if ((lmn_grid[j][0] == 0) & (lmn_grid[j][1] == 0) & (lmn_grid[j][2] == 0)):
@@ -90,11 +109,7 @@ for i in range(0, N3):
         else:
             k = kmin*np.sqrt(lmn_grid[j][0]**2 + lmn_grid[j][1]**2 + lmn_grid[j][2]**2)
             k2 = k*k
-            norm_delta_klmn = np.sqrt(-np.interp(k, pkinit[:,0], pkinit[:,1])*np.log(np.random.uniform(0, 1)))
-            tetha_klmn = 2*np.pi*np.random.uniform(0, 1)
-            delta_klmn = norm_delta_klmn * np.exp(tetha_klmn*1j)
-            # dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
-            dsum = kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
+            dsum = kmin * 1j * (delta_field_klmn[j] / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*np.array([lmn_grid[j][0].astype(np.float), lmn_grid[j][1].astype(np.float), lmn_grid[j][2].astype(np.float)])
             dx[i] += const1_L32 * dsum
             # tensor
             # T[0,0] = kmin**2*dsum*lmn_grid[j][0]**2
@@ -109,7 +124,7 @@ for i in range(0, N3):
             T = np.zeros((3,3), dtype = np.complex)
             for ii in range(0,3):
                 for jj in range(0,3):
-                    T[ii,jj] = (kmin**2)*kmin * 1j * (delta_klmn / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*lmn_grid[j][ii]*lmn_grid[j][jj]
+                    T[ii,jj] = (kmin**2)*kmin * 1j * (delta_field_klmn[j] / k2) * np.exp(1j * np.dot([lmn_grid[j][0], lmn_grid[j][1], lmn_grid[j][2]], [x1[i], x2[i], x3[i]]))*lmn_grid[j][ii]*lmn_grid[j][jj]
             lambdas[i] = LA.eigvalsh(T)        
             
 
