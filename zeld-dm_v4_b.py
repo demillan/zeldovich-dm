@@ -17,8 +17,8 @@ def growthfunc(a, omega_m=0.307115, omega_l=0.692885):
 # Parámetros iniciales
 
 redshift = 0
-boxsize = 128
-ngrid = 128
+boxsize = 256
+ngrid = 256
 f=0.0
 
 M = int(boxsize / ngrid)
