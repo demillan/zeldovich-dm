@@ -66,7 +66,7 @@ mp.scatter(x1, x2, s=0.1, marker = ".")
 #%%
 
 # delta field generation
-reps = 5
+reps = 50
 delta_init_all = np.zeros(shape = (N3, reps), dtype = np.float64)
 
 for rep in range(0, reps):
@@ -88,11 +88,10 @@ a0=eps*a0.flatten()
 b0=eps*b0.flatten()
 c0=eps*c0.flatten()
 
-
 dens0 = np.zeros(shape = (M, M, M, reps), dtype = np.float64)
+iseed = int(np.random.randint(20190109, size=1))
 for rep in range(0, reps):
-    iseed = int(np.random.randint(20181006, size=1))
-    dens0[:,:,:,rep] = Z.make_gauss_init(pkinit, boxsize=boxsize, ngrid=ngrid, seed=iseed, exactpk=True, smw=2.)
+    dens0[:,:,:,rep] = Z.make_gauss_init(pkinit, boxsize=boxsize, ngrid=ngrid, seed=int(np.random.randint(iseed, size=1)), exactpk=True, smw=2.)
 
 #%%
 mp.pcolormesh(np.linspace(0, boxsize, M), np.linspace(0, boxsize, M), dens0[:,:,1,0], cmap='rainbow')
@@ -101,7 +100,7 @@ mp.colorbar()
 mp.show()
 
 #%%
-delta_init_3d = delta_init_all[:,0].reshape(M, M, M)
+delta_init_3d = delta_init_all[:,21].reshape(M, M, M)
 k, pk = getPk(delta_init_3d, nkbins=20, boxsize=boxsize, deconvolve_cic=False, exp_smooth=0.0)
 
 mp.loglog(pkinit[:,0], pkinit[:,1])
@@ -114,7 +113,7 @@ mp.title('Power spectrum of the final density field')
 mp.figure()
 
 #%%
-k0, pk0 = getPk(dens0[:,:,:,0], nkbins=20, boxsize=boxsize, deconvolve_cic=False, exp_smooth=0.0)
+k0, pk0 = getPk(dens0[:,:,:,4], nkbins=20, boxsize=boxsize, deconvolve_cic=False, exp_smooth=0.0)
 
 mp.loglog(pkinit[:,0], pkinit[:,1])
 mp.loglog(k, pk)
@@ -157,4 +156,4 @@ mp.title('Mean power spectrum of the final density field')
 mp.figure()
 
 #%%
-dens0[1:10,1:10,1:10,1]
+np.random.randint(20190110, size=1)

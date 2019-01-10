@@ -1,4 +1,4 @@
 {
     "python.linting.pylintEnabled": false,
-    "python.dataScience.jupyterServerURI": " http://localhost:8080/?token=c84b268e54b3daa0824d38fe02e1c93343c7ff420c9359a8&token=c84b268e54b3daa0824d38fe02e1c93343c7ff420c9359a8"
+    "python.dataScience.jupyterServerURI": " http://localhost:8080/?token=2ccb80c427a64de68a61d69fc85b168cc27b169b1d521f9b&token=2ccb80c427a64de68a61d69fc85b168cc27b169b1d521f9b"
 }
