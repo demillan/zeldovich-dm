@@ -23,7 +23,7 @@ def growthfunc(a, omega_m=0.307115, omega_l=0.692885):
 
 # Parámetros iniciales
 
-num_cores = 10
+num_cores = 4
 
 redshift = 0
 boxsize = 100
@@ -66,7 +66,7 @@ mp.scatter(x1, x2, s=0.1, marker = ".")
 #%%
 
 # delta field generation
-reps = 50
+reps = 1
 delta_init_all = np.zeros(shape = (N3, reps), dtype = np.float64)
 
 for rep in range(0, reps):
@@ -75,6 +75,9 @@ for rep in range(0, reps):
     randtheta = np.random.random(len(lmn_grid))
     delta_init = Parallel(n_jobs=num_cores)(delayed(init_field_part)(kmin, lmn_grid, pkinit, x1, x2, x3, i, randnorm, randtheta) for i in range(0, N3))
     delta_init_all[:,rep] = np.array(delta_init) * const1_L32
+
+#%%
+fft = np.fft.rfftn(delta_init_all)
 
 #%%
 # Otro AZ
